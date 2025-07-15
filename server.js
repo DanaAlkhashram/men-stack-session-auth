@@ -6,6 +6,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan')
 
 const mongoose = require('mongoose');
+const session = require('express-session')
 const authController = require('./controllers/authcontroller');
 
 // DATABASE CONNECTION
@@ -18,13 +19,18 @@ mongoose.connection.on("connected",() => {
 app.use(express.urlencoded({ extended: false }));   
 app.use(methodOverride("_method")); //METHOD DELETE & PUT
 app.use(morgan('dev')); //HTTP REQUEST
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+}))
 
 // SHORT HAND FOR IF STATMENT => TERNARY OPERATOR
             //IF               //TRUE            //ELSE  
 const port = process.env.PORT ? process.env.PORT : "3000";
 
 app.get('/',(req, res)=>{
-    res.render('index.ejs',{title: 'my App'})
+    res.render('index.ejs',{title: 'my App' , user:req.session.user})
 })
 
 // ROUTES

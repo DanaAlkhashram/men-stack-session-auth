@@ -49,12 +49,19 @@ router.post('/sign-in', async(req,res) => {
     // check if user already exists in database
 const userInDatabase = await User.findOne({username: req.body.username})
 
-    // if this not exist so they need to sign-up
+    // if userInDatabase is NOT false (that means the user does exists) then send this message
     if (!userInDatabase){
         return res.send('Login failed. Please try again. ')
     }
 
     const validPassword = bcrypt.compareSync(req.body.password, userInDatabase.password)
+    if(!validPassword){
+        return res.send('Login failed. Please try again. ')
+    }
+    req.session.user = {
+        username: userInDatabase.username,
+        _id: userInDatabase._id
+    }
 })
 
 module.exports = router;
