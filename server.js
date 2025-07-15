@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({quiet: true});
 const express = require('express');
 const app = express();
 
@@ -6,6 +6,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan')
 
 const mongoose = require('mongoose');
+const authController = require('./controllers/authcontroller');
 
 // DATABASE CONNECTION
 mongoose.connect(process.env.MONGODB_URI)
@@ -25,6 +26,10 @@ const port = process.env.PORT ? process.env.PORT : "3000";
 app.get('/',(req, res)=>{
     res.render('index.ejs',{title: 'my App'})
 })
+
+// ROUTES
+app.use("/auth",authController)
+
 
 app.listen(port,() => {
     console.log(`The express app is ready on port ${port}`)
