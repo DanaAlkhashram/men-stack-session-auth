@@ -6,8 +6,12 @@ const methodOverride = require('method-override');
 const morgan = require('morgan')
 
 const mongoose = require('mongoose');
-const session = require('express-session')
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const authController = require('./controllers/authcontroller');
+const isSignedIn = require('./middleware/js-sign-in')
+const passUserToView = require('./middleware/pass-user-to-view')
+
 
 // DATABASE CONNECTION
 mongoose.connect(process.env.MONGODB_URI)
@@ -23,7 +27,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+    })
 }))
+app.use(passUserToView)
 
 // SHORT HAND FOR IF STATMENT => TERNARY OPERATOR
             //IF               //TRUE            //ELSE  
@@ -35,6 +43,10 @@ app.get('/',(req, res)=>{
 
 // ROUTES
 app.use("/auth",authController)
+
+app.get('/vip-lounge',isSignedIn, (req,res)=>{
+   res.send(`Welcome to the party ${req.session.user.username}.`);
+})
 
 
 app.listen(port,() => {
